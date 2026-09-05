@@ -1,0 +1,4774 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vera</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#090611;
+  color:white;
+}
+
+body{overflow:hidden}
+
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.55}
+.hidden{display:none!important}
+
+/* ================= AUTH ================= */
+
+#authScreen{
+  width:100%;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at center,#24113f 0%,#10081d 40%,#090611 75%);
+}
+
+.authBox{
+  width:410px;
+  max-width:92%;
+  padding:35px;
+  border:1px solid #382052;
+  border-radius:25px;
+  background:rgba(15,8,28,.94);
+  box-shadow:0 0 50px rgba(130,70,255,.15);
+}
+
+.logo{
+  text-align:center;
+  font-size:42px;
+  font-weight:bold;
+  margin-bottom:5px;
+  color:#d8b4ff;
+}
+
+.subtitle{
+  text-align:center;
+  color:#988ba8;
+  margin-bottom:30px;
+}
+
+.authBox input{
+  width:100%;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:12px;
+  border:1px solid #3b2453;
+  background:#120b1c;
+  color:white;
+  outline:none;
+}
+
+.authBox input:focus{border-color:#9b5cff}
+
+.primaryBtn{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:12px;
+  color:white;
+  background:linear-gradient(135deg,#7b3cff,#b25cff);
+  margin-top:5px;
+}
+
+.secondaryBtn{
+  width:100%;
+  padding:13px;
+  margin-top:10px;
+  border:1px solid #42275d;
+  border-radius:12px;
+  background:#150c21;
+  color:#d8c7e8;
+}
+
+.authSwitch{
+  text-align:center;
+  margin-top:18px;
+  color:#a99bb7;
+}
+
+.authSwitch span{
+  color:#b978ff;
+  cursor:pointer;
+}
+
+.authError{
+  color:#ff7f9b;
+  text-align:center;
+  min-height:20px;
+  margin-bottom:8px;
+}
+
+/* ================= APP ================= */
+
+#app{
+  width:100%;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  height:70px;
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 25px;
+  border-bottom:1px solid #241632;
+  background:rgba(10,5,17,.92);
+}
+
+.brand{
+  font-size:25px;
+  font-weight:bold;
+  color:#d6b2ff;
+}
+
+.topActions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.userBadge{
+  padding:8px 13px;
+  border-radius:20px;
+  background:#181022;
+  border:1px solid #352047;
+  color:#cfc1da;
+}
+
+.iconBtn{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  border:1px solid #39214e;
+  background:#150b20;
+  color:white;
+  position:relative;
+}
+
+.iconBtn:hover{background:#21102f}
+
+.notificationCount{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  min-width:18px;
+  height:18px;
+  border-radius:20px;
+  background:#ff416d;
+  color:white;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 5px;
+}
+
+.logoutBtn{
+  padding:9px 14px;
+  border-radius:10px;
+  border:1px solid #39214e;
+  background:#150b20;
+  color:#c9b9d6;
+}
+
+/* ================= CHAT ================= */
+
+.chatArea{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
+.chatMessages{
+  flex:1;
+  overflow-y:auto;
+  padding:35px 20px 120px;
+}
+
+.welcome{
+  height:100%;
+  min-height:350px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.orb{
+  width:130px;
+  height:130px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 35% 30%,#e3c7ff,#9d50ff 35%,#47127a 70%,#180625);
+  box-shadow:0 0 30px #7e35ff,0 0 80px rgba(126,53,255,.35);
+  animation:orbPulse 3s infinite ease-in-out;
+}
+
+@keyframes orbPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.07)}
+}
+
+.welcome h1{
+  margin-top:25px;
+  margin-bottom:5px;
+}
+
+.welcome p{color:#8f829b}
+
+.message{
+  max-width:850px;
+  margin:0 auto 15px;
+  padding:15px 18px;
+  border-radius:18px;
+  line-height:1.55;
+  white-space:pre-wrap;
+}
+
+.message.user{
+  background:#27113a;
+  border:1px solid #44215e;
+  margin-left:auto;
+}
+
+.message.assistant{
+  background:#110a18;
+  border:1px solid #2d1b3d;
+  margin-right:auto;
+}
+
+.typing{opacity:.6}
+
+/* ================= INPUT ================= */
+
+.inputArea{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:18px 20px;
+  background:linear-gradient(transparent,#090611 35%);
+}
+
+.inputBox{
+  max-width:900px;
+  margin:auto;
+  display:flex;
+  gap:8px;
+  padding:8px;
+  border:1px solid #3b2453;
+  border-radius:17px;
+  background:#10091a;
+}
+
+.inputBox textarea{
+  flex:1;
+  min-height:45px;
+  max-height:120px;
+  resize:none;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:white;
+  padding:12px;
+}
+
+.sendBtn,.micBtn{
+  width:48px;
+  border:0;
+  border-radius:12px;
+  background:#7c42d8;
+  color:white;
+}
+
+.micBtn{background:#20102d}
+
+/* ================= ADMIN ================= */
+
+#adminPanel{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:#08050e;
+  display:none;
+  flex-direction:column;
+}
+
+.adminHeader{
+  height:70px;
+  min-height:70px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 25px;
+  border-bottom:1px solid #2c193e;
+}
+
+.adminTitle{
+  font-size:24px;
+  font-weight:bold;
+}
+
+.adminSubtitle{
+  font-size:12px;
+  color:#81718d;
+  margin-top:3px;
+}
+
+.adminBody{
+  flex:1;
+  display:flex;
+  min-height:0;
+}
+
+.adminSidebar{
+  width:235px;
+  padding:18px;
+  border-right:1px solid #2c193e;
+  background:#0d0714;
+  overflow-y:auto;
+}
+
+.adminGroupTitle{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:#665770;
+  margin:18px 8px 8px;
+}
+
+.adminTab{
+  width:100%;
+  text-align:left;
+  padding:12px;
+  margin-bottom:6px;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:#aa9bb7;
+}
+
+.adminTab:hover,
+.adminTab.active{
+  background:#1b0e28;
+  border-color:#39204f;
+  color:white;
+}
+
+.adminContent{
+  flex:1;
+  overflow-y:auto;
+  padding:25px;
+}
+
+.adminSection{display:none}
+.adminSection.active{display:block}
+
+.sectionTitle{
+  margin-top:0;
+  margin-bottom:20px;
+}
+
+.sectionDescription{
+  color:#84758e;
+  margin-top:-12px;
+  margin-bottom:22px;
+}
+
+/* ================= CARDS ================= */
+
+.statsGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.statCard{
+  padding:20px;
+  border-radius:15px;
+  border:1px solid #30203e;
+  background:#10091a;
+}
+
+.statNumber{
+  font-size:29px;
+  font-weight:bold;
+  color:#cf9cff;
+}
+
+.statLabel{
+  color:#8e8099;
+  margin-top:5px;
+}
+
+.adminCard{
+  border:1px solid #30203e;
+  border-radius:15px;
+  background:#10091a;
+  padding:20px;
+  margin-bottom:18px;
+}
+
+.adminCard h3{margin-top:0}
+
+.cardHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.cardHeader h3{margin:0}
+
+/* ================= SETTINGS ================= */
+
+.settingsGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:15px;
+}
+
+.settingsCard{
+  padding:18px;
+  border:1px solid #30203e;
+  border-radius:15px;
+  background:#10091a;
+}
+
+.settingsIcon{
+  font-size:25px;
+  margin-bottom:10px;
+}
+
+.settingsCard h3{
+  margin:0 0 7px;
+}
+
+.settingsCard p{
+  color:#82738d;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.configInput{
+  width:100%;
+  padding:11px;
+  margin:7px 0 15px;
+  border:1px solid #3b2451;
+  border-radius:10px;
+  background:#0e0815;
+  color:white;
+}
+
+.configTextarea{
+  width:100%;
+  min-height:220px;
+  padding:12px;
+  resize:vertical;
+  border:1px solid #3b2451;
+  border-radius:10px;
+  background:#0e0815;
+  color:white;
+}
+
+.switchRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:13px 0;
+  border-bottom:1px solid #241632;
+}
+
+.switchRow:last-child{border-bottom:0}
+
+.switchText strong{
+  display:block;
+}
+
+.switchText span{
+  display:block;
+  font-size:12px;
+  color:#7e7088;
+  margin-top:3px;
+}
+
+.switch{
+  position:relative;
+  width:48px;
+  height:25px;
+  flex:none;
+}
+
+.switch input{display:none}
+
+.slider{
+  position:absolute;
+  inset:0;
+  background:#291a35;
+  border:1px solid #4a2d5f;
+  border-radius:30px;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  width:19px;
+  height:19px;
+  left:2px;
+  top:2px;
+  border-radius:50%;
+  background:#8b7897;
+  transition:.2s;
+}
+
+.switch input:checked + .slider{
+  background:#6934a4;
+}
+
+.switch input:checked + .slider:before{
+  transform:translateX(22px);
+  background:#fff;
+}
+
+/* ================= TABLE ================= */
+
+.tableWrap{overflow-x:auto}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  text-align:left;
+  padding:12px 9px;
+  border-bottom:1px solid #241632;
+  vertical-align:top;
+}
+
+th{
+  color:#a98ebc;
+  font-size:13px;
+}
+
+td{
+  font-size:13px;
+}
+
+.smallBtn{
+  border:1px solid #43275a;
+  background:#170d21;
+  color:#d7c4e5;
+  padding:7px 10px;
+  border-radius:8px;
+  margin:2px;
+}
+
+.smallBtn:hover{background:#241334}
+
+.dangerBtn{
+  border-color:#5b2537;
+  color:#ff91aa;
+}
+
+.roleSelect{
+  background:#160d20;
+  border:1px solid #3b2451;
+  color:white;
+  padding:7px;
+  border-radius:8px;
+}
+
+.status{
+  padding:5px 9px;
+  border-radius:15px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.status.ok{
+  background:#18301f;
+  color:#83e5a0;
+}
+
+.status.bad{
+  background:#351621;
+  color:#ff819e;
+}
+
+.status.warn{
+  background:#352c16;
+  color:#e8d17d;
+}
+
+.status.info{
+  background:#211936;
+  color:#c59cff;
+}
+
+/* ================= HEALTH ================= */
+
+.healthGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+}
+
+.healthDot{
+  display:inline-block;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#72e69a;
+  margin-right:6px;
+}
+
+/* ================= SEARCH ================= */
+
+.searchRow{
+  display:flex;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.searchInput{
+  flex:1;
+  padding:11px;
+  border:1px solid #3b2451;
+  border-radius:10px;
+  background:#0e0815;
+  color:white;
+  outline:none;
+}
+
+.filterSelect{
+  padding:11px;
+  border:1px solid #3b2451;
+  border-radius:10px;
+  background:#0e0815;
+  color:white;
+}
+
+/* ================= NOTIFICATIONS ================= */
+
+.notificationPanel{
+  position:fixed;
+  top:65px;
+  right:20px;
+  width:390px;
+  max-width:calc(100% - 30px);
+  max-height:70vh;
+  overflow-y:auto;
+  z-index:500;
+  border:1px solid #44255d;
+  border-radius:16px;
+  background:#10091a;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  display:none;
+}
+
+.notificationPanel.show{display:block}
+
+.notificationHeader{
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid #2c193d;
+}
+
+.notificationItem{
+  padding:14px;
+  border-bottom:1px solid #241632;
+}
+
+.notificationItem.unread{background:#160d23}
+
+.notificationType{
+  font-size:11px;
+  color:#b979ff;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+
+.notificationText{color:#ded3e6}
+
+.notificationDate{
+  font-size:11px;
+  color:#75687f;
+  margin-top:7px;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.72);
+}
+
+.modal.show{display:flex}
+
+.modalBox{
+  width:440px;
+  max-width:92%;
+  max-height:90vh;
+  overflow-y:auto;
+  background:#10091a;
+  border:1px solid #41245a;
+  border-radius:18px;
+  padding:25px;
+}
+
+.modalBox input,
+.modalBox textarea,
+.modalBox select{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  background:#0b0710;
+  border:1px solid #3b2453;
+  color:white;
+  border-radius:10px;
+}
+
+.modalBox textarea{min-height:130px}
+
+.modalActions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.modalActions button{flex:1}
+
+.empty{
+  color:#7f728a;
+  text-align:center;
+  padding:30px;
+}
+
+.infoBox{
+  padding:13px 15px;
+  border:1px solid #3b2453;
+  background:#150b20;
+  border-radius:10px;
+  color:#9d8da9;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.warningBox{
+  padding:13px 15px;
+  border:1px solid #5c4930;
+  background:#241b0d;
+  border-radius:10px;
+  color:#d8bd7c;
+  font-size:13px;
+}
+
+.successBox{
+  padding:13px 15px;
+  border:1px solid #315d42;
+  background:#102117;
+  border-radius:10px;
+  color:#91dca8;
+  font-size:13px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:850px){
+
+  .adminSidebar{width:190px}
+  .adminContent{padding:15px}
+
+}
+
+@media(max-width:650px){
+
+  .topbar{padding:0 12px}
+  .userBadge{display:none}
+
+  .adminSidebar{
+    width:62px;
+    padding:8px;
+  }
+
+  .adminTab{
+    font-size:0;
+    text-align:center;
+    padding:12px 5px;
+  }
+
+  .adminGroupTitle{display:none}
+
+  .adminTab::first-letter{
+    font-size:18px;
+  }
+
+  .searchRow{
+    flex-direction:column;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+
+<div id="authScreen">
+
+  <div class="authBox">
+
+    <div class="logo">Vera</div>
+
+    <div class="subtitle">
+      Tu asistente inteligente
+    </div>
+
+    <div id="authError" class="authError"></div>
+
+    <div id="loginForm">
+
+      <input
+        id="loginUsuario"
+        placeholder="Usuario"
+        autocomplete="username"
+      >
+
+      <input
+        id="loginPassword"
+        type="password"
+        placeholder="Contraseña"
+        autocomplete="current-password"
+      >
+
+      <button class="primaryBtn" onclick="login()">
+        Iniciar sesión
+      </button>
+
+      <button class="secondaryBtn" onclick="entrarInvitado()">
+        Entrar como invitado
+      </button>
+
+      <div class="authSwitch">
+        ¿No tienes cuenta?
+        <span onclick="mostrarRegistro()">
+          Crear cuenta
+        </span>
+      </div>
+
+    </div>
+
+    <div id="registerForm" class="hidden">
+
+      <input
+        id="registerUsuario"
+        placeholder="Nuevo usuario"
+      >
+
+      <input
+        id="registerPassword"
+        type="password"
+        placeholder="Contraseña"
+      >
+
+      <button class="primaryBtn" onclick="registrar()">
+        Crear cuenta
+      </button>
+
+      <div class="authSwitch">
+        ¿Ya tienes cuenta?
+        <span onclick="mostrarLogin()">
+          Iniciar sesión
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= APP ================= -->
+
+<div id="app" class="hidden">
+
+  <div class="topbar">
+
+    <div class="brand">Vera</div>
+
+    <div class="topActions">
+
+      <div id="userBadge" class="userBadge">
+        Usuario
+      </div>
+
+      <button
+        id="notificationButton"
+        class="iconBtn hidden"
+        onclick="toggleNotifications()"
+      >
+        🔔
+        <span id="notificationCount" class="notificationCount hidden">
+          0
+        </span>
+      </button>
+
+      <button
+        id="adminButton"
+        class="iconBtn hidden"
+        onclick="abrirAdmin()"
+      >
+        ⚙️
+      </button>
+
+      <button class="logoutBtn" onclick="logout()">
+        Salir
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="chatArea">
+
+    <div id="chatMessages" class="chatMessages">
+
+      <div id="welcome" class="welcome">
+
+        <div class="orb"></div>
+
+        <h1>Hola, soy Vera.</h1>
+
+        <p>¿En qué puedo ayudarte?</p>
+
+      </div>
+
+    </div>
+
+    <div class="inputArea">
+
+      <div class="inputBox">
+
+        <button
+          id="micButton"
+          class="micBtn"
+          onclick="activarMicrofono()"
+        >
+          🎙️
+        </button>
+
+        <textarea
+          id="messageInput"
+          placeholder="Escribe un mensaje..."
+          onkeydown="manejarEnter(event)"
+        ></textarea>
+
+        <button
+          id="sendButton"
+          class="sendBtn"
+          onclick="enviarMensaje()"
+        >
+          ➤
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= NOTIFICACIONES ================= -->
+
+<div id="notificationPanel" class="notificationPanel">
+
+  <div class="notificationHeader">
+
+    <strong>Notificaciones</strong>
+
+    <button
+      class="smallBtn"
+      onclick="marcarTodasNotificaciones()"
+    >
+      Marcar todas
+    </button>
+
+  </div>
+
+  <div id="notificationList"></div>
+
+</div>
+
+<!-- ================= ADMIN ================= -->
+
+<div id="adminPanel">
+
+  <div class="adminHeader">
+
+    <div>
+      <div class="adminTitle">
+        Vera Control Center
+      </div>
+
+      <div class="adminSubtitle">
+        Administración avanzada de Vera
+      </div>
+    </div>
+
+    <button class="logoutBtn" onclick="cerrarAdmin()">
+      Cerrar
+    </button>
+
+  </div>
+
+  <div class="adminBody">
+
+    <div class="adminSidebar">
+
+      <div class="adminGroupTitle">General</div>
+
+      <button
+        class="adminTab active"
+        onclick="mostrarSeccion('dashboard',this)"
+      >
+        📊 Dashboard
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('cuentas',this)"
+      >
+        👥 Cuentas
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('solicitudes',this)"
+      >
+        📩 Solicitudes
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('avisos',this)"
+      >
+        📢 Comunicaciones
+      </button>
+
+      <div class="adminGroupTitle">Moderación</div>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('moderacion',this)"
+      >
+        🛡️ Moderación
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('seguridad',this)"
+      >
+        🔐 Seguridad
+      </button>
+
+      <div class="adminGroupTitle">Sistema</div>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('health',this)"
+      >
+        💚 Salud
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('config',this)"
+      >
+        ⚙️ Vera
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('mantenimiento',this)"
+      >
+        🔧 Mantenimiento
+      </button>
+
+      <div class="adminGroupTitle">Datos</div>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('analiticas',this)"
+      >
+        📈 Analíticas
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('logs',this)"
+      >
+        📋 Logs
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('auditoria',this)"
+      >
+        🕵️ Auditoría
+      </button>
+
+      <button
+        class="adminTab"
+        onclick="mostrarSeccion('conversaciones',this)"
+      >
+        💬 Conversaciones
+      </button>
+
+    </div>
+
+    <div class="adminContent">
+
+      <!-- DASHBOARD -->
+
+      <section id="section-dashboard" class="adminSection active">
+
+        <h2 class="sectionTitle">Dashboard</h2>
+
+        <p class="sectionDescription">
+          Vista general del estado de Vera.
+        </p>
+
+        <div id="statsGrid" class="statsGrid"></div>
+
+        <div class="adminCard">
+
+          <div class="cardHeader">
+            <h3>Estado de Vera</h3>
+
+            <button class="smallBtn" onclick="cargarDashboard()">
+              ↻ Actualizar
+            </button>
+          </div>
+
+          <div id="dashboardHealth">
+            Cargando...
+          </div>
+
+        </div>
+
+        <div class="settingsGrid">
+
+          <div class="settingsCard">
+
+            <div class="settingsIcon">👥</div>
+
+            <h3>Usuarios</h3>
+
+            <p>
+              Administra cuentas, roles, suspensiones y accesos.
+            </p>
+
+            <button
+              class="smallBtn"
+              onclick="mostrarSeccionPorNombre('cuentas')"
+            >
+              Abrir
+            </button>
+
+          </div>
+
+          <div class="settingsCard">
+
+            <div class="settingsIcon">🛡️</div>
+
+            <h3>Seguridad</h3>
+
+            <p>
+              Controla filtros y protecciones de Vera.
+            </p>
+
+            <button
+              class="smallBtn"
+              onclick="mostrarSeccionPorNombre('seguridad')"
+            >
+              Abrir
+            </button>
+
+          </div>
+
+          <div class="settingsCard">
+
+            <div class="settingsIcon">📢</div>
+
+            <h3>Comunicaciones</h3>
+
+            <p>
+              Publica avisos y mensajes globales.
+            </p>
+
+            <button
+              class="smallBtn"
+              onclick="mostrarSeccionPorNombre('avisos')"
+            >
+              Abrir
+            </button>
+
+          </div>
+
+          <div class="settingsCard">
+
+            <div class="settingsIcon">📈</div>
+
+            <h3>Analíticas</h3>
+
+            <p>
+              Revisa actividad y calidad de Vera.
+            </p>
+
+            <button
+              class="smallBtn"
+              onclick="mostrarSeccionPorNombre('analiticas')"
+            >
+              Abrir
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- CUENTAS -->
+
+      <section id="section-cuentas" class="adminSection">
+
+        <h2 class="sectionTitle">Cuentas</h2>
+
+        <p class="sectionDescription">
+          Usuarios registrados e invitados detectados por Vera.
+        </p>
+
+        <div class="adminCard">
+
+          <div class="searchRow">
+
+            <input
+              id="accountSearch"
+              class="searchInput"
+              placeholder="Buscar usuario..."
+              oninput="filtrarUsuarios()"
+            >
+
+            <select
+              id="accountFilter"
+              class="filterSelect"
+              onchange="filtrarUsuarios()"
+            >
+              <option value="todos">Todos</option>
+              <option value="admin">Admin</option>
+              <option value="moderador">Moderador</option>
+              <option value="premium">Premium</option>
+              <option value="estandar">Estándar</option>
+              <option value="invitado">Invitados</option>
+              <option value="suspendido">Suspendidos</option>
+            </select>
+
+            <button class="smallBtn" onclick="cargarUsuarios()">
+              ↻
+            </button>
+
+          </div>
+
+          <div id="accountsTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SOLICITUDES -->
+
+      <section id="section-solicitudes" class="adminSection">
+
+        <h2 class="sectionTitle">Solicitudes</h2>
+
+        <p class="sectionDescription">
+          Solicitudes de mejora y cambios enviados por usuarios.
+        </p>
+
+        <div class="adminCard">
+
+          <div id="requestsTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- AVISOS -->
+
+      <section id="section-avisos" class="adminSection">
+
+        <h2 class="sectionTitle">Comunicaciones</h2>
+
+        <p class="sectionDescription">
+          Publica avisos que Vera puede mostrar a los usuarios.
+        </p>
+
+        <div class="adminCard">
+
+          <div class="cardHeader">
+
+            <h3>Avisos del sistema</h3>
+
+            <button
+              class="smallBtn"
+              onclick="abrirAvisoModal()"
+            >
+              ＋ Nuevo aviso
+            </button>
+
+          </div>
+
+          <div id="avisosTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- MODERACION -->
+
+      <section id="section-moderacion" class="adminSection">
+
+        <h2 class="sectionTitle">Moderación</h2>
+
+        <p class="sectionDescription">
+          Revisa reportes y eventos de seguridad detectados por Vera.
+        </p>
+
+        <div class="adminCard">
+
+          <div class="cardHeader">
+            <h3>Reportes</h3>
+
+            <button class="smallBtn" onclick="cargarModeracion()">
+              ↻ Actualizar
+            </button>
+          </div>
+
+          <div id="moderationTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SEGURIDAD -->
+
+      <section id="section-seguridad" class="adminSection">
+
+        <h2 class="sectionTitle">Vera Safety Center</h2>
+
+        <p class="sectionDescription">
+          Configuración de las protecciones de seguridad.
+        </p>
+
+        <div class="adminCard">
+
+          <div class="switchRow">
+
+            <div class="switchText">
+              <strong>🧒 Protección de menores</strong>
+              <span>
+                Mantiene activas las protecciones reforzadas.
+              </span>
+            </div>
+
+            <label class="switch">
+              <input id="safeMinor" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="switchRow">
+
+            <div class="switchText">
+              <strong>🔞 Contenido sexual explícito</strong>
+              <span>
+                Bloquea solicitudes sexuales explícitas.
+              </span>
+            </div>
+
+            <label class="switch">
+              <input id="safeSexual" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="switchRow">
+
+            <div class="switchText">
+              <strong>🚫 Pornografía</strong>
+              <span>
+                Bloquea solicitudes pornográficas.
+              </span>
+            </div>
+
+            <label class="switch">
+              <input id="safePorn" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="switchRow">
+
+            <div class="switchText">
+              <strong>❤️ Autolesiones</strong>
+              <span>
+                Activa protección para contenido relacionado con autolesiones.
+              </span>
+            </div>
+
+            <label class="switch">
+              <input id="safeSelfHarm" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="switchRow">
+
+            <div class="switchText">
+              <strong>⚠️ Violencia gráfica</strong>
+              <span>
+                Reduce contenido gráfico peligroso.
+              </span>
+            </div>
+
+            <label class="switch">
+              <input id="safeViolence" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <div class="switchRow">
+
+            <div class="switchText">
+              <strong>🧠 Detección de evasión</strong>
+              <span>
+                Detecta intentos de saltarse las protecciones.
+              </span>
+            </div>
+
+            <label class="switch">
+              <input id="safeInjection" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <button
+            class="primaryBtn"
+            onclick="guardarSeguridad()"
+          >
+            Guardar seguridad
+          </button>
+
+        </div>
+
+        <div class="adminCard">
+
+          <h3>Palabras bloqueadas</h3>
+
+          <p class="sectionDescription">
+            Una palabra o frase por línea.
+          </p>
+
+          <textarea
+            id="safeWords"
+            class="configTextarea"
+            style="min-height:150px"
+          ></textarea>
+
+          <button
+            class="primaryBtn"
+            onclick="guardarPalabrasProhibidas()"
+          >
+            Guardar palabras
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- HEALTH -->
+
+      <section id="section-health" class="adminSection">
+
+        <h2 class="sectionTitle">Salud de Vera</h2>
+
+        <p class="sectionDescription">
+          Estado operativo del backend y del servicio de IA.
+        </p>
+
+        <div id="healthGrid" class="healthGrid"></div>
+
+      </section>
+
+      <!-- CONFIG -->
+
+      <section id="section-config" class="adminSection">
+
+        <h2 class="sectionTitle">Configuración de Vera</h2>
+
+        <p class="sectionDescription">
+          Parámetros de comportamiento de la inteligencia artificial.
+        </p>
+
+        <div class="adminCard">
+
+          <label>Modelo</label>
+
+          <input
+            id="configModel"
+            class="configInput"
+          >
+
+          <label>Temperature</label>
+
+          <input
+            id="configTemperature"
+            type="number"
+            step="0.1"
+            min="0"
+            max="2"
+            class="configInput"
+          >
+
+          <label>Top-P</label>
+
+          <input
+            id="configTopP"
+            type="number"
+            step="0.01"
+            min="0.01"
+            max="1"
+            class="configInput"
+          >
+
+          <label>Máxima longitud de respuesta</label>
+
+          <input
+            id="configMaxTokens"
+            type="number"
+            min="100"
+            max="8192"
+            class="configInput"
+          >
+
+          <label>System Prompt</label>
+
+          <textarea
+            id="configPrompt"
+            class="configTextarea"
+          ></textarea>
+
+          <button
+            class="primaryBtn"
+            onclick="guardarConfiguracion()"
+          >
+            Guardar configuración
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- MANTENIMIENTO -->
+
+      <section id="section-mantenimiento" class="adminSection">
+
+        <h2 class="sectionTitle">Mantenimiento</h2>
+
+        <p class="sectionDescription">
+          Control general del acceso a Vera.
+        </p>
+
+        <div class="adminCard">
+
+          <div class="switchRow">
+
+            <div class="switchText">
+
+              <strong>🔧 Modo mantenimiento</strong>
+
+              <span>
+                Impide el uso normal de Vera mientras está activo.
+              </span>
+
+            </div>
+
+            <label class="switch">
+              <input id="maintenanceEnabled" type="checkbox">
+              <span class="slider"></span>
+            </label>
+
+          </div>
+
+          <label>Mensaje de mantenimiento</label>
+
+          <textarea
+            id="maintenanceMessage"
+            class="configTextarea"
+            style="min-height:120px"
+          ></textarea>
+
+          <button
+            class="primaryBtn"
+            onclick="guardarMantenimiento()"
+          >
+            Guardar mantenimiento
+          </button>
+
+        </div>
+
+        <div class="warningBox">
+          ⚠️ El acceso administrativo debe permanecer disponible durante mantenimiento.
+        </div>
+
+      </section>
+
+      <!-- ANALITICAS -->
+
+      <section id="section-analiticas" class="adminSection">
+
+        <h2 class="sectionTitle">Analíticas</h2>
+
+        <p class="sectionDescription">
+          Actividad y calidad de uso de Vera, sin estadísticas de tokens ni costos.
+        </p>
+
+        <div
+          id="analyticsGrid"
+          class="statsGrid"
+        >
+          Cargando...
+        </div>
+
+        <div class="adminCard">
+
+          <div class="cardHeader">
+            <h3>Feedback</h3>
+          </div>
+
+          <div id="feedbackAnalytics">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- LOGS -->
+
+      <section id="section-logs" class="adminSection">
+
+        <h2 class="sectionTitle">Logs</h2>
+
+        <div class="adminCard">
+
+          <div class="cardHeader">
+
+            <h3>Actividad del sistema</h3>
+
+            <button class="smallBtn" onclick="cargarLogs()">
+              ↻
+            </button>
+
+          </div>
+
+          <div id="logsTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- AUDITORIA -->
+
+      <section id="section-auditoria" class="adminSection">
+
+        <h2 class="sectionTitle">Auditoría</h2>
+
+        <p class="sectionDescription">
+          Registro de cambios realizados desde el Control Center.
+        </p>
+
+        <div class="adminCard">
+
+          <div id="auditTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- CONVERSACIONES -->
+
+      <section id="section-conversaciones" class="adminSection">
+
+        <h2 class="sectionTitle">Conversaciones</h2>
+
+        <p class="sectionDescription">
+          Supervisión de conversaciones registradas.
+        </p>
+
+        <div class="adminCard">
+
+          <div id="conversationTable">
+            Cargando...
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= PASSWORD MODAL ================= -->
+
+<div id="passwordModal" class="modal">
+
+  <div class="modalBox">
+
+    <h3>Cambiar contraseña</h3>
+
+    <div class="infoBox">
+      Las contraseñas no se pueden visualizar. Este proceso crea una nueva contraseña.
+    </div>
+
+    <input
+      id="newPassword"
+      type="password"
+      placeholder="Nueva contraseña"
+    >
+
+    <div class="modalActions">
+
+      <button
+        class="secondaryBtn"
+        onclick="cerrarPasswordModal()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        class="primaryBtn"
+        onclick="guardarNuevaPassword()"
+      >
+        Guardar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= AVISO MODAL ================= -->
+
+<div id="avisoModal" class="modal">
+
+  <div class="modalBox">
+
+    <h3 id="avisoModalTitle">
+      Nuevo aviso
+    </h3>
+
+    <input
+      id="avisoTitulo"
+      placeholder="Título del aviso"
+    >
+
+    <textarea
+      id="avisoMensaje"
+      placeholder="Mensaje..."
+    ></textarea>
+
+    <select id="avisoTipo">
+
+      <option value="info">
+        Información
+      </option>
+
+      <option value="importante">
+        Importante
+      </option>
+
+      <option value="mantenimiento">
+        Mantenimiento
+      </option>
+
+      <option value="actualizacion">
+        Actualización
+      </option>
+
+    </select>
+
+    <select id="avisoAudiencia">
+
+      <option value="todos">
+        Todos
+      </option>
+
+      <option value="invitados">
+        Invitados
+      </option>
+
+      <option value="estandar">
+        Estándar
+      </option>
+
+      <option value="premium">
+        Premium
+      </option>
+
+      <option value="moderador">
+        Moderadores
+      </option>
+
+      <option value="admin">
+        Administradores
+      </option>
+
+    </select>
+
+    <input
+      id="avisoBotonTexto"
+      placeholder="Texto del botón (opcional)"
+    >
+
+    <input
+      id="avisoBotonUrl"
+      placeholder="URL del botón (opcional)"
+    >
+
+    <div class="switchRow">
+
+      <div class="switchText">
+        <strong>Activar aviso</strong>
+        <span>
+          Mostrarlo inmediatamente.
+        </span>
+      </div>
+
+      <label class="switch">
+        <input id="avisoActivo" type="checkbox" checked>
+        <span class="slider"></span>
+      </label>
+
+    </div>
+
+    <div class="modalActions">
+
+      <button
+        class="secondaryBtn"
+        onclick="cerrarAvisoModal()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        class="primaryBtn"
+        onclick="guardarAviso()"
+      >
+        Publicar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+/* ==================================================
+   CONFIG
+================================================== */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxBwjIqQYWFsLMB76Dx9GIMMU4vMyFoUqyARNeTa4y24TR7ZtUL_Q3Qa7il5VJt93RJnw/exec";
+
+let token = localStorage.getItem("vera_token") || "";
+let usuario = localStorage.getItem("vera_usuario") || "";
+let tipo = localStorage.getItem("vera_tipo") || "";
+
+let historial = [];
+let usuarioSeleccionadoPassword = "";
+let usuariosAdmin = [];
+let timerRateLimit = null;
+let enviandoMensaje = false;
+
+/* ==================================================
+   API
+================================================== */
+
+async function api(data){
+
+  try{
+
+    const response = await fetch(
+      API_URL,
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"text/plain;charset=utf-8"
+        },
+        body:JSON.stringify(data)
+      }
+    );
+
+    const json = await response.json();
+
+    return json;
+
+  }catch(error){
+
+    console.error(error);
+
+    return {
+      error:"CONNECTION_ERROR",
+      mensaje:"No se pudo conectar con Vera.",
+      razon:"El servidor no respondió correctamente."
+    };
+
+  }
+
+}
+
+/* ==================================================
+   AUTH
+================================================== */
+
+function mostrarRegistro(){
+
+  document.getElementById("loginForm").classList.add("hidden");
+  document.getElementById("registerForm").classList.remove("hidden");
+  limpiarAuthError();
+
+}
+
+function mostrarLogin(){
+
+  document.getElementById("registerForm").classList.add("hidden");
+  document.getElementById("loginForm").classList.remove("hidden");
+  limpiarAuthError();
+
+}
+
+function mostrarAuthError(texto){
+  document.getElementById("authError").textContent = texto || "";
+}
+
+function limpiarAuthError(){
+  mostrarAuthError("");
+}
+
+async function login(){
+
+  limpiarAuthError();
+
+  const u = document.getElementById("loginUsuario").value.trim();
+  const p = document.getElementById("loginPassword").value;
+
+  if(!u || !p){
+    mostrarAuthError("Completa todos los campos.");
+    return;
+  }
+
+  try{
+
+    const data = await api({
+      accion:"login",
+      usuario:u,
+      password:p
+    });
+
+    if(data.error){
+      mostrarAuthError(
+        data.mensaje ||
+        data.error
+      );
+      return;
+    }
+
+    guardarSesion(data);
+    mostrarApp();
+
+  }catch(error){
+
+    mostrarAuthError(
+      "No se pudo conectar con Vera."
+    );
+
+  }
+
+}
+
+async function registrar(){
+
+  limpiarAuthError();
+
+  const u = document.getElementById("registerUsuario").value.trim();
+  const p = document.getElementById("registerPassword").value;
+
+  if(!u || !p){
+    mostrarAuthError("Completa todos los campos.");
+    return;
+  }
+
+  try{
+
+    const data = await api({
+      accion:"registrar",
+      usuario:u,
+      password:p
+    });
+
+    if(data.error){
+      mostrarAuthError(
+        data.mensaje ||
+        data.error
+      );
+      return;
+    }
+
+    guardarSesion(data);
+    mostrarApp();
+
+  }catch(error){
+
+    mostrarAuthError(
+      "No se pudo conectar con Vera."
+    );
+
+  }
+
+}
+
+async function entrarInvitado(){
+
+  limpiarAuthError();
+
+  const data = await api({
+    accion:"invitado"
+  });
+
+  if(data.error){
+
+    mostrarAuthError(
+      data.mensaje ||
+      data.error
+    );
+
+    return;
+  }
+
+  guardarSesion(data);
+  mostrarApp();
+
+}
+
+function guardarSesion(data){
+
+  token = data.token || "";
+  usuario = data.usuario || "";
+  tipo = data.rol || data.tipo || "";
+
+  localStorage.setItem("vera_token",token);
+  localStorage.setItem("vera_usuario",usuario);
+  localStorage.setItem("vera_tipo",tipo);
+
+}
+
+function mostrarApp(){
+
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  document.getElementById("userBadge").textContent =
+    usuario + " · " + tipo;
+
+  const esAdmin =
+    tipo === "admin" &&
+    usuario === "Elion";
+
+  if(esAdmin){
+
+    document.getElementById("adminButton")
+      .classList.remove("hidden");
+
+    document.getElementById("notificationButton")
+      .classList.remove("hidden");
+
+  }
+
+  historial = [];
+  enviandoMensaje = false;
+  limpiarEstadoEnvio();
+
+  document.getElementById("chatMessages").innerHTML = `
+
+    <div id="welcome" class="welcome">
+
+      <div class="orb"></div>
+
+      <h1>Hola, soy Vera.</h1>
+
+      <p>¿En qué puedo ayudarte?</p>
+
+    </div>
+
+  `;
+
+  cargarNotificaciones();
+
+}
+
+function logout(){
+
+  if(token){
+
+    api({
+      accion:"logout",
+      token:token
+    }).catch(()=>{});
+
+  }
+
+  token = "";
+  usuario = "";
+  tipo = "";
+  historial = [];
+
+  localStorage.removeItem("vera_token");
+  localStorage.removeItem("vera_usuario");
+  localStorage.removeItem("vera_tipo");
+
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("authScreen").classList.remove("hidden");
+  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById("adminButton").classList.add("hidden");
+  document.getElementById("notificationButton").classList.add("hidden");
+  document.getElementById("notificationPanel").classList.remove("show");
+
+}
+
+/* ==================================================
+   ENVÍO
+================================================== */
+
+function bloquearEnvio(){
+
+  const input = document.getElementById("messageInput");
+  const send = document.getElementById("sendButton");
+  const mic = document.getElementById("micButton");
+
+  if(input) input.disabled = true;
+
+  if(send){
+    send.disabled = true;
+    send.textContent = "…";
+  }
+
+  if(mic) mic.disabled = true;
+
+}
+
+function limpiarEstadoEnvio(){
+
+  const input = document.getElementById("messageInput");
+  const send = document.getElementById("sendButton");
+  const mic = document.getElementById("micButton");
+
+  if(input) input.disabled = false;
+
+  if(send){
+    send.disabled = false;
+    send.textContent = "➤";
+  }
+
+  if(mic) mic.disabled = false;
+
+}
+
+function bloquearPorRateLimit(segundos){
+
+  const tiempo = Math.max(1,Number(segundos)||2);
+
+  if(timerRateLimit)
+    clearTimeout(timerRateLimit);
+
+  bloquearEnvio();
+
+  const send = document.getElementById("sendButton");
+
+  let restante = tiempo;
+
+  if(send)
+    send.textContent = restante + "s";
+
+  const intervalo = setInterval(()=>{
+
+    restante--;
+
+    if(restante <= 0){
+
+      clearInterval(intervalo);
+      limpiarEstadoEnvio();
+      return;
+
+    }
+
+    if(send)
+      send.textContent = restante + "s";
+
+  },1000);
+
+  timerRateLimit = setTimeout(()=>{
+
+    clearInterval(intervalo);
+    timerRateLimit = null;
+    limpiarEstadoEnvio();
+
+  },tiempo*1000);
+
+}
+
+/* ==================================================
+   CHAT
+================================================== */
+
+function manejarEnter(event){
+
+  if(
+    event.key === "Enter" &&
+    !event.shiftKey
+  ){
+
+    event.preventDefault();
+    enviarMensaje();
+
+  }
+
+}
+
+function agregarMensaje(rol,texto){
+
+  const welcome = document.getElementById("welcome");
+
+  if(welcome)
+    welcome.remove();
+
+  const contenedor =
+    document.getElementById("chatMessages");
+
+  const div = document.createElement("div");
+
+  div.className =
+    "message " +
+    (rol === "user" ? "user" : "assistant");
+
+  div.textContent = texto;
+
+  contenedor.appendChild(div);
+
+  contenedor.scrollTop =
+    contenedor.scrollHeight;
+
+}
+
+function mostrarTyping(){
+
+  const contenedor =
+    document.getElementById("chatMessages");
+
+  const div =
+    document.createElement("div");
+
+  div.id = "typing";
+  div.className = "message assistant typing";
+  div.textContent = "Vera está escribiendo...";
+
+  contenedor.appendChild(div);
+
+  contenedor.scrollTop =
+    contenedor.scrollHeight;
+
+}
+
+function ocultarTyping(){
+
+  const typing =
+    document.getElementById("typing");
+
+  if(typing)
+    typing.remove();
+
+}
+
+async function enviarMensaje(){
+
+  if(enviandoMensaje)
+    return;
+
+  const input =
+    document.getElementById("messageInput");
+
+  const mensaje =
+    input.value.trim();
+
+  if(!mensaje)
+    return;
+
+  enviandoMensaje = true;
+  bloquearEnvio();
+
+  input.value = "";
+
+  agregarMensaje("user",mensaje);
+
+  historial.push({
+    rol:"user",
+    texto:mensaje
+  });
+
+  mostrarTyping();
+
+  try{
+
+    const data = await api({
+
+      accion:"chat",
+      token:token,
+      mensaje:mensaje,
+      historial:historial
+
+    });
+
+    ocultarTyping();
+
+    if(data.error === "SESSION_EXPIRED"){
+
+      agregarMensaje(
+        "assistant",
+        data.mensaje ||
+        "Tu sesión expiró."
+      );
+
+      setTimeout(logout,1200);
+      return;
+
+    }
+
+    if(data.error === "MESSAGE_LIMIT"){
+
+      mostrarLimite(
+        data.limite,
+        data.usados
+      );
+
+      return;
+
+    }
+
+    if(data.error === "RATE_LIMITED"){
+
+      agregarMensaje(
+        "assistant",
+        data.mensaje ||
+        "Espera un momento antes de enviar otro mensaje."
+      );
+
+      bloquearPorRateLimit(
+        data.segundos || 2
+      );
+
+      return;
+
+    }
+
+    if(data.error){
+
+      agregarMensaje(
+        "assistant",
+        data.mensaje ||
+        data.error
+      );
+
+      return;
+
+    }
+
+    const respuesta =
+      data.respuesta ||
+      "No recibí una respuesta.";
+
+    agregarMensaje(
+      "assistant",
+      respuesta
+    );
+
+    historial.push({
+      rol:"assistant",
+      texto:respuesta
+    });
+
+  }catch(error){
+
+    ocultarTyping();
+
+    agregarMensaje(
+      "assistant",
+      "No pude conectar con Vera."
+    );
+
+  }finally{
+
+    enviandoMensaje = false;
+
+    if(!timerRateLimit)
+      limpiarEstadoEnvio();
+
+  }
+
+}
+
+function mostrarLimite(limite,usados){
+
+  agregarMensaje(
+    "assistant",
+    "Has llegado al límite diario de tu cuenta.\n\n" +
+    "Uso: " +
+    usados +
+    " / " +
+    limite +
+    " mensajes.\n\n" +
+    "Puedes solicitar una mejora de cuenta."
+  );
+
+  if(
+    confirm(
+      "¿Quieres enviar una solicitud de mejora?"
+    )
+  ){
+
+    solicitarMejora();
+
+  }
+
+}
+
+async function solicitarMejora(){
+
+  const mensaje =
+    prompt(
+      "Escribe por qué deseas mejorar tu cuenta:"
+    );
+
+  if(mensaje === null)
+    return;
+
+  const data = await api({
+
+    accion:"solicitarMejora",
+    token:token,
+    mensaje:mensaje
+
+  });
+
+  if(data.error){
+
+    alert(
+      data.mensaje ||
+      data.error
+    );
+
+    return;
+
+  }
+
+  alert(
+    "Solicitud enviada correctamente."
+  );
+
+}
+
+function activarMicrofono(){
+
+  alert(
+    "El sistema de voz lo agregaremos después."
+  );
+
+}
+
+/* ==================================================
+   ADMIN
+================================================== */
+
+function abrirAdmin(){
+
+  if(
+    tipo !== "admin" ||
+    usuario !== "Elion"
+  )
+    return;
+
+  document.getElementById("adminPanel").style.display = "flex";
+
+  const firstTab =
+    document.querySelector(".adminTab");
+
+  mostrarSeccion(
+    "dashboard",
+    firstTab
+  );
+
+  cargarTodoAdmin();
+
+}
+
+function cerrarAdmin(){
+
+  document.getElementById("adminPanel").style.display = "none";
+
+}
+
+function mostrarSeccion(nombre,boton){
+
+  document.querySelectorAll(".adminSection")
+    .forEach(section=>{
+      section.classList.remove("active");
+    });
+
+  const section =
+    document.getElementById(
+      "section-" + nombre
+    );
+
+  if(section)
+    section.classList.add("active");
+
+  document.querySelectorAll(".adminTab")
+    .forEach(btn=>{
+      btn.classList.remove("active");
+    });
+
+  if(boton)
+    boton.classList.add("active");
+
+  cargarSeccionAdmin(nombre);
+
+}
+
+function mostrarSeccionPorNombre(nombre){
+
+  const botones =
+    document.querySelectorAll(".adminTab");
+
+  for(const boton of botones){
+
+    const texto =
+      boton.textContent.toLowerCase();
+
+    if(
+      (nombre==="cuentas" && texto.includes("cuentas")) ||
+      (nombre==="seguridad" && texto.includes("seguridad")) ||
+      (nombre==="avisos" && texto.includes("comunicaciones")) ||
+      (nombre==="analiticas" && texto.includes("analíticas"))
+    ){
+
+      mostrarSeccion(nombre,boton);
+      return;
+
+    }
+
+  }
+
+}
+
+function cargarSeccionAdmin(nombre){
+
+  if(nombre==="dashboard") cargarDashboard();
+  if(nombre==="cuentas") cargarUsuarios();
+  if(nombre==="solicitudes") cargarSolicitudes();
+  if(nombre==="avisos") cargarAvisos();
+  if(nombre==="moderacion") cargarModeracion();
+  if(nombre==="seguridad") cargarSeguridad();
+  if(nombre==="health") cargarHealth();
+  if(nombre==="config") cargarConfiguracion();
+  if(nombre==="mantenimiento") cargarMantenimiento();
+  if(nombre==="analiticas") cargarAnaliticas();
+  if(nombre==="logs") cargarLogs();
+  if(nombre==="auditoria") cargarAuditoria();
+  if(nombre==="conversaciones") cargarConversaciones();
+
+}
+
+function cargarTodoAdmin(){
+
+  cargarDashboard();
+  cargarUsuarios();
+  cargarSolicitudes();
+  cargarHealth();
+  cargarConfiguracion();
+  cargarLogs();
+  cargarConversaciones();
+
+  cargarAvisos();
+  cargarModeracion();
+  cargarSeguridad();
+  cargarMantenimiento();
+  cargarAnaliticas();
+  cargarAuditoria();
+
+}
+
+/* ==================================================
+   DASHBOARD
+================================================== */
+
+async function cargarDashboard(){
+
+  try{
+
+    const data = await api({
+      accion:"dashboard",
+      token:token
+    });
+
+    if(data.error)
+      return;
+
+    const s = data.estadisticas || {};
+
+    document.getElementById("statsGrid").innerHTML = `
+
+      <div class="statCard">
+        <div class="statNumber">${s.total ?? 0}</div>
+        <div class="statLabel">Cuentas</div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">${s.premium ?? 0}</div>
+        <div class="statLabel">Premium</div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">${s.estandar ?? 0}</div>
+        <div class="statLabel">Estándar</div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">${s.moderadores ?? 0}</div>
+        <div class="statLabel">Moderadores</div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">${s.suspendidos ?? 0}</div>
+        <div class="statLabel">Suspendidas</div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">${s.invitados ?? 0}</div>
+        <div class="statLabel">Invitados</div>
+      </div>
+
+    `;
+
+    document.getElementById("dashboardHealth").innerHTML = `
+
+      🔔 Notificaciones pendientes:
+      <strong>${data.notificacionesPendientes ?? 0}</strong>
+
+      <br><br>
+
+      📩 Solicitudes pendientes:
+      <strong>${data.solicitudesPendientes ?? 0}</strong>
+
+      <br><br>
+
+      🕐 Última actualización:
+      <strong>${new Date().toLocaleString("es-MX")}</strong>
+
+    `;
+
+  }catch(error){
+    console.error(error);
+  }
+
+}
+
+/* ==================================================
+   CUENTAS
+================================================== */
+
+async function cargarUsuarios(){
+
+  const container =
+    document.getElementById("accountsTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"listarUsuarios",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    usuariosAdmin =
+      data.usuarios || [];
+
+    renderUsuarios(usuariosAdmin);
+
+  }catch(error){
+
+    container.textContent =
+      "No se pudieron cargar las cuentas.";
+
+  }
+
+}
+
+function filtrarUsuarios(){
+
+  const search =
+    (
+      document.getElementById("accountSearch")
+        ?.value ||
+      ""
+    ).toLowerCase();
+
+  const filtro =
+    document.getElementById("accountFilter")
+      ?.value ||
+      "todos";
+
+  const lista =
+    usuariosAdmin.filter(u=>{
+
+      const nombre =
+        String(u.usuario || "")
+          .toLowerCase();
+
+      const coincideNombre =
+        nombre.includes(search);
+
+      let coincideFiltro = true;
+
+      if(filtro !== "todos"){
+
+        if(filtro === "suspendido")
+          coincideFiltro = !!u.suspendido;
+
+        else
+          coincideFiltro =
+            String(u.rol || "") === filtro;
+
+      }
+
+      return coincideNombre && coincideFiltro;
+
+    });
+
+  renderUsuarios(lista);
+
+}
+
+function renderUsuarios(usuarios){
+
+  const container =
+    document.getElementById("accountsTable");
+
+  if(!usuarios.length){
+
+    container.innerHTML =
+      `<div class="empty">No hay resultados.</div>`;
+
+    return;
+
+  }
+
+  let html = `
+
+    <div class="tableWrap">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Rol</th>
+          <th>Mensajes</th>
+          <th>Último acceso</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+  `;
+
+  usuarios.forEach(u=>{
+
+    const ilimitado =
+      u.limiteMensajes === null ||
+      u.limiteMensajes === undefined;
+
+    const mensajes =
+      ilimitado
+      ? "∞"
+      : `${u.mensajesHoy || 0} / ${u.limiteMensajes}`;
+
+    const estado =
+      u.suspendido
+      ? `<span class="status bad">Suspendida</span>`
+      : (
+          u.rol === "invitado"
+          ? `<span class="status info">Invitado</span>`
+          : `<span class="status ok">Activa</span>`
+        );
+
+    const esAdmin =
+      u.rol === "admin";
+
+    const esInvitado =
+      u.rol === "invitado";
+
+    html += `
+
+      <tr>
+
+        <td>
+          <strong>
+            ${escapeHTML(u.usuario)}
+          </strong>
+        </td>
+
+        <td>
+
+          ${
+            esAdmin
+            ? "👑 Admin"
+            : `
+              <select
+                class="roleSelect"
+                onchange="cambiarRol(
+                  '${escapeJS(u.usuario)}',
+                  this.value
+                )"
+              >
+
+                <option value="estandar"
+                  ${u.rol==="estandar"?"selected":""}>
+                  Estándar
+                </option>
+
+                <option value="premium"
+                  ${u.rol==="premium"?"selected":""}>
+                  Premium
+                </option>
+
+                <option value="moderador"
+                  ${u.rol==="moderador"?"selected":""}>
+                  Moderador
+                </option>
+
+              </select>
+            `
+          }
+
+        </td>
+
+        <td>${mensajes}</td>
+
+        <td>${formatearFecha(u.ultimoAcceso)}</td>
+
+        <td>${estado}</td>
+
+        <td>
+
+          ${
+            !esAdmin && !esInvitado
+            ? `
+
+              <button
+                class="smallBtn"
+                onclick="suspenderUsuario(
+                  '${escapeJS(u.usuario)}',
+                  ${!u.suspendido}
+                )"
+              >
+                ${u.suspendido ? "Reactivar" : "Suspender"}
+              </button>
+
+              <button
+                class="smallBtn"
+                onclick="abrirPasswordModal(
+                  '${escapeJS(u.usuario)}'
+                )"
+              >
+                🔑
+              </button>
+
+              <button
+                class="smallBtn dangerBtn"
+                onclick="eliminarUsuario(
+                  '${escapeJS(u.usuario)}'
+                )"
+              >
+                🗑️
+              </button>
+
+            `
+            : "—"
+          }
+
+        </td>
+
+      </tr>
+
+    `;
+
+  });
+
+  html += `
+      </tbody>
+    </table>
+
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+}
+
+/* ==================================================
+   CAMBIOS CUENTA
+================================================== */
+
+async function cambiarRol(usuarioObjetivo,rol){
+
+  const data = await api({
+
+    accion:"cambiarRol",
+    token:token,
+    usuario:usuarioObjetivo,
+    rol:rol
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    cargarUsuarios();
+    return;
+
+  }
+
+  cargarUsuarios();
+  cargarDashboard();
+
+}
+
+async function suspenderUsuario(usuarioObjetivo,suspendido){
+
+  let razon = "";
+
+  if(suspendido){
+
+    razon =
+      prompt(
+        "Motivo de suspensión:"
+      );
+
+    if(razon === null)
+      return;
+
+  }
+
+  const data = await api({
+
+    accion:"suspenderUsuario",
+    token:token,
+    usuario:usuarioObjetivo,
+    suspendido:suspendido,
+    razon:razon
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cargarUsuarios();
+  cargarDashboard();
+
+}
+
+async function eliminarUsuario(usuarioObjetivo){
+
+  if(
+    !confirm(
+      "¿Seguro que quieres eliminar la cuenta de " +
+      usuarioObjetivo +
+      "?"
+    )
+  )
+    return;
+
+  const data = await api({
+
+    accion:"eliminarUsuario",
+    token:token,
+    usuario:usuarioObjetivo
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cargarUsuarios();
+  cargarDashboard();
+
+}
+
+/* ==================================================
+   PASSWORD
+================================================== */
+
+function abrirPasswordModal(usuarioObjetivo){
+
+  usuarioSeleccionadoPassword =
+    usuarioObjetivo;
+
+  document.getElementById("newPassword").value = "";
+
+  document.getElementById("passwordModal")
+    .classList.add("show");
+
+}
+
+function cerrarPasswordModal(){
+
+  document.getElementById("passwordModal")
+    .classList.remove("show");
+
+}
+
+async function guardarNuevaPassword(){
+
+  const p =
+    document.getElementById("newPassword").value;
+
+  if(p.length < 4){
+
+    alert(
+      "La contraseña debe tener al menos 4 caracteres."
+    );
+
+    return;
+
+  }
+
+  const data = await api({
+
+    accion:"cambiarPassword",
+    token:token,
+    usuario:usuarioSeleccionadoPassword,
+    nuevaPassword:p
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cerrarPasswordModal();
+
+  alert(
+    "Contraseña actualizada correctamente."
+  );
+
+}
+
+/* ==================================================
+   SOLICITUDES
+================================================== */
+
+async function cargarSolicitudes(){
+
+  const container =
+    document.getElementById("requestsTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"solicitudes",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const solicitudes =
+      data.solicitudes || [];
+
+    if(!solicitudes.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No hay solicitudes.
+        </div>`;
+
+      return;
+
+    }
+
+    let html = `
+
+      <div class="tableWrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Mensaje</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+    `;
+
+    solicitudes.forEach(s=>{
+
+      let botones = "—";
+
+      if(s.estado === "pendiente"){
+
+        botones = `
+
+          <button
+            class="smallBtn"
+            onclick="resolverSolicitud(
+              '${escapeJS(s.id)}',
+              'aprobar'
+            )"
+          >
+            Aprobar
+          </button>
+
+          <button
+            class="smallBtn dangerBtn"
+            onclick="resolverSolicitud(
+              '${escapeJS(s.id)}',
+              'rechazar'
+            )"
+          >
+            Rechazar
+          </button>
+
+        `;
+
+      }
+
+      html += `
+
+        <tr>
+
+          <td>${escapeHTML(s.usuario)}</td>
+
+          <td>${escapeHTML(s.mensaje)}</td>
+
+          <td>${escapeHTML(s.estado)}</td>
+
+          <td>${formatearFecha(s.fecha)}</td>
+
+          <td>${botones}</td>
+
+        </tr>
+
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  }catch(error){
+
+    container.textContent =
+      "Error al cargar solicitudes.";
+
+  }
+
+}
+
+async function resolverSolicitud(id,accionSolicitud){
+
+  const data = await api({
+
+    accion:"resolverSolicitud",
+    token:token,
+    id:id,
+    accionSolicitud:accionSolicitud
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cargarSolicitudes();
+  cargarUsuarios();
+  cargarDashboard();
+
+}
+
+/* ==================================================
+   HEALTH
+================================================== */
+
+async function cargarHealth(){
+
+  const container =
+    document.getElementById("healthGrid");
+
+  try{
+
+    const data = await api({
+
+      accion:"health",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const h = data.health || {};
+
+    container.innerHTML = `
+
+      <div class="statCard">
+
+        <div class="statNumber">
+          <span class="healthDot"></span>
+        </div>
+
+        <div class="statLabel">
+          ${escapeHTML(h.estado || "Desconocido")}
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statNumber">
+          ${h.latenciaMs ?? "—"} ms
+        </div>
+
+        <div class="statLabel">
+          Latencia
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statNumber">✓</div>
+
+        <div class="statLabel">
+          ${escapeHTML(h.backend || "Backend")}
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statNumber">
+          Vera
+        </div>
+
+        <div class="statLabel">
+          ${escapeHTML(h.modelo || "—")}
+        </div>
+
+      </div>
+
+    `;
+
+  }catch(error){
+
+    container.textContent =
+      "No se pudo comprobar el estado.";
+
+  }
+
+}
+
+/* ==================================================
+   CONFIG
+================================================== */
+
+async function cargarConfiguracion(){
+
+  try{
+
+    const data = await api({
+
+      accion:"obtenerConfiguracion",
+      token:token
+
+    });
+
+    if(data.error)
+      return;
+
+    const c = data.config || {};
+
+    document.getElementById("configModel").value =
+      c.model || "";
+
+    document.getElementById("configTemperature").value =
+      c.temperature ?? "";
+
+    document.getElementById("configTopP").value =
+      c.topP ?? "";
+
+    document.getElementById("configMaxTokens").value =
+      c.maxOutputTokens ?? "";
+
+    document.getElementById("configPrompt").value =
+      c.systemPrompt || "";
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+async function guardarConfiguracion(){
+
+  const config = {
+
+    model:
+      document.getElementById("configModel").value.trim(),
+
+    temperature:
+      Number(
+        document.getElementById("configTemperature").value
+      ),
+
+    topP:
+      Number(
+        document.getElementById("configTopP").value
+      ),
+
+    maxOutputTokens:
+      Number(
+        document.getElementById("configMaxTokens").value
+      ),
+
+    systemPrompt:
+      document.getElementById("configPrompt").value
+
+  };
+
+  const data = await api({
+
+    accion:"guardarConfiguracion",
+    token:token,
+    config:config
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  alert(
+    "Configuración guardada correctamente."
+  );
+
+}
+
+/* ==================================================
+   SEGURIDAD
+================================================== */
+
+async function cargarSeguridad(){
+
+  try{
+
+    const data = await api({
+
+      accion:"obtenerSeguridad",
+      token:token
+
+    });
+
+    if(data.error)
+      return;
+
+    const s = data.seguridad || {};
+
+    document.getElementById("safeMinor").checked =
+      !!s.minorProtection;
+
+    document.getElementById("safeSexual").checked =
+      !!s.explicitSexual;
+
+    document.getElementById("safePorn").checked =
+      !!s.pornography;
+
+    document.getElementById("safeSelfHarm").checked =
+      !!s.selfHarm;
+
+    document.getElementById("safeViolence").checked =
+      !!s.graphicViolence;
+
+    document.getElementById("safeInjection").checked =
+      !!s.promptInjection;
+
+    document.getElementById("safeWords").value =
+      (s.prohibitedWords || []).join("\n");
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+async function guardarSeguridad(){
+
+  const seguridad = {
+
+    minorProtection:
+      document.getElementById("safeMinor").checked,
+
+    explicitSexual:
+      document.getElementById("safeSexual").checked,
+
+    pornography:
+      document.getElementById("safePorn").checked,
+
+    selfHarm:
+      document.getElementById("safeSelfHarm").checked,
+
+    graphicViolence:
+      document.getElementById("safeViolence").checked,
+
+    promptInjection:
+      document.getElementById("safeInjection").checked
+
+  };
+
+  const data = await api({
+
+    accion:"guardarSeguridad",
+    token:token,
+    seguridad:seguridad
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  alert(
+    "Configuración de seguridad guardada."
+  );
+
+}
+
+async function guardarPalabrasProhibidas(){
+
+  const palabras =
+    document.getElementById("safeWords")
+      .value
+      .split("\n")
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+  const data = await api({
+
+    accion:"guardarPalabrasProhibidas",
+    token:token,
+    palabras:palabras
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  alert(
+    "Palabras bloqueadas actualizadas."
+  );
+
+}
+
+/* ==================================================
+   AVISOS
+================================================== */
+
+function abrirAvisoModal(){
+
+  document.getElementById("avisoTitulo").value = "";
+  document.getElementById("avisoMensaje").value = "";
+  document.getElementById("avisoBotonTexto").value = "";
+  document.getElementById("avisoBotonUrl").value = "";
+  document.getElementById("avisoActivo").checked = true;
+
+  document.getElementById("avisoModal")
+    .classList.add("show");
+
+}
+
+function cerrarAvisoModal(){
+
+  document.getElementById("avisoModal")
+    .classList.remove("show");
+
+}
+
+async function cargarAvisos(){
+
+  const container =
+    document.getElementById("avisosTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"listarAvisos",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const avisos =
+      data.avisos || [];
+
+    if(!avisos.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No hay avisos creados.
+        </div>`;
+
+      return;
+
+    }
+
+    let html = `
+
+      <div class="tableWrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Audiencia</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+    `;
+
+    avisos.forEach(a=>{
+
+      html += `
+
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHTML(a.titulo || a.title)}
+            </strong>
+            <br>
+            <span style="color:#786982">
+              ${escapeHTML(a.mensaje || "")}
+            </span>
+          </td>
+
+          <td>
+            ${escapeHTML(a.tipo || "info")}
+          </td>
+
+          <td>
+            ${escapeHTML(a.audiencia || "todos")}
+          </td>
+
+          <td>
+
+            ${
+              a.activo
+              ? `<span class="status ok">Activo</span>`
+              : `<span class="status bad">Inactivo</span>`
+            }
+
+          </td>
+
+          <td>
+            ${formatearFecha(a.creado || a.fecha)}
+          </td>
+
+          <td>
+
+            <button
+              class="smallBtn"
+              onclick="toggleAviso(
+                '${escapeJS(a.id)}',
+                ${!a.activo}
+              )"
+            >
+              ${a.activo ? "Desactivar" : "Activar"}
+            </button>
+
+            <button
+              class="smallBtn dangerBtn"
+              onclick="eliminarAviso(
+                '${escapeJS(a.id)}'
+              )"
+            >
+              🗑️
+            </button>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  }catch(error){
+
+    container.textContent =
+      "No se pudieron cargar los avisos.";
+
+  }
+
+}
+
+async function guardarAviso(){
+
+  const aviso = {
+
+    titulo:
+      document.getElementById("avisoTitulo").value.trim(),
+
+    mensaje:
+      document.getElementById("avisoMensaje").value.trim(),
+
+    tipo:
+      document.getElementById("avisoTipo").value,
+
+    audiencia:
+      document.getElementById("avisoAudiencia").value,
+
+    botonTexto:
+      document.getElementById("avisoBotonTexto").value.trim(),
+
+    botonUrl:
+      document.getElementById("avisoBotonUrl").value.trim(),
+
+    activo:
+      document.getElementById("avisoActivo").checked
+
+  };
+
+  if(!aviso.titulo || !aviso.mensaje){
+
+    alert(
+      "Escribe un título y un mensaje."
+    );
+
+    return;
+
+  }
+
+  const data = await api({
+
+    accion:"crearAviso",
+    token:token,
+    aviso:aviso
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cerrarAvisoModal();
+  cargarAvisos();
+
+}
+
+async function toggleAviso(id,activo){
+
+  const data = await api({
+
+    accion:"activarAviso",
+    token:token,
+    id:id,
+    activo:activo
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cargarAvisos();
+
+}
+
+async function eliminarAviso(id){
+
+  if(
+    !confirm(
+      "¿Eliminar este aviso?"
+    )
+  )
+    return;
+
+  const data = await api({
+
+    accion:"eliminarAviso",
+    token:token,
+    id:id
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cargarAvisos();
+
+}
+
+/* ==================================================
+   MODERACION
+================================================== */
+
+async function cargarModeracion(){
+
+  const container =
+    document.getElementById("moderationTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"reportes",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const reportes =
+      data.reportes || [];
+
+    if(!reportes.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No hay reportes pendientes.
+        </div>`;
+
+      return;
+
+    }
+
+    let html = `
+
+      <div class="tableWrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Usuario</th>
+            <th>Motivo</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+    reportes.forEach(r=>{
+
+      html += `
+
+        <tr>
+
+          <td>${escapeHTML(r.usuario)}</td>
+
+          <td>${escapeHTML(r.motivo)}</td>
+
+          <td>${escapeHTML(r.descripcion)}</td>
+
+          <td>${escapeHTML(r.estado)}</td>
+
+          <td>${formatearFecha(r.fecha)}</td>
+
+          <td>
+
+            ${
+              r.estado === "pendiente"
+              ? `
+
+                <button
+                  class="smallBtn"
+                  onclick="resolverReporte(
+                    '${escapeJS(r.id)}',
+                    'resolver'
+                  )"
+                >
+                  Resolver
+                </button>
+
+                <button
+                  class="smallBtn dangerBtn"
+                  onclick="resolverReporte(
+                    '${escapeJS(r.id)}',
+                    'descartar'
+                  )"
+                >
+                  Descartar
+                </button>
+
+              `
+              : "—"
+            }
+
+          </td>
+
+        </tr>
+
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  }catch(error){
+
+    container.textContent =
+      "No se pudieron cargar los reportes.";
+
+  }
+
+}
+
+async function resolverReporte(id,accion){
+
+  const data = await api({
+
+    accion:"resolverReporte",
+    token:token,
+    id:id,
+    estado:accion
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  cargarModeracion();
+
+}
+
+/* ==================================================
+   MANTENIMIENTO
+================================================== */
+
+async function cargarMantenimiento(){
+
+  try{
+
+    const data = await api({
+
+      accion:"obtenerMantenimiento",
+      token:token
+
+    });
+
+    if(data.error)
+      return;
+
+    const m =
+      data.mantenimiento || {};
+
+    document.getElementById(
+      "maintenanceEnabled"
+    ).checked = !!m.enabled;
+
+    document.getElementById(
+      "maintenanceMessage"
+    ).value =
+      m.message ||
+      "Vera está temporalmente en mantenimiento.";
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+async function guardarMantenimiento(){
+
+  const mantenimiento = {
+
+    enabled:
+      document.getElementById(
+        "maintenanceEnabled"
+      ).checked,
+
+    message:
+      document.getElementById(
+        "maintenanceMessage"
+      ).value.trim()
+
+  };
+
+  const data = await api({
+
+    accion:"guardarMantenimiento",
+    token:token,
+    mantenimiento:mantenimiento
+
+  });
+
+  if(data.error){
+
+    alert(data.mensaje || data.error);
+    return;
+
+  }
+
+  alert(
+    "Configuración de mantenimiento guardada."
+  );
+
+}
+
+/* ==================================================
+   ANALITICAS
+================================================== */
+
+async function cargarAnaliticas(){
+
+  try{
+
+    const data = await api({
+
+      accion:"analiticas",
+      token:token
+
+    });
+
+    if(data.error){
+
+      document.getElementById(
+        "analyticsGrid"
+      ).innerHTML =
+        `<div class="empty">
+          ${escapeHTML(data.mensaje || data.error)}
+        </div>`;
+
+      return;
+
+    }
+
+    const a =
+      data.analiticas || {};
+
+    document.getElementById(
+      "analyticsGrid"
+    ).innerHTML = `
+
+      <div class="statCard">
+        <div class="statNumber">
+          ${a.usuariosActivos ?? 0}
+        </div>
+        <div class="statLabel">
+          Usuarios activos
+        </div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">
+          ${a.conversacionesHoy ?? 0}
+        </div>
+        <div class="statLabel">
+          Conversaciones hoy
+        </div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">
+          ${a.erroresHoy ?? 0}
+        </div>
+        <div class="statLabel">
+          Errores hoy
+        </div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">
+          ${a.reportesPendientes ?? 0}
+        </div>
+        <div class="statLabel">
+          Reportes pendientes
+        </div>
+      </div>
+
+    `;
+
+    const positivos =
+      a.feedbackPositivo ?? 0;
+
+    const negativos =
+      a.feedbackNegativo ?? 0;
+
+    document.getElementById(
+      "feedbackAnalytics"
+    ).innerHTML = `
+
+      👍 Feedback positivo:
+      <strong>${positivos}</strong>
+
+      <br><br>
+
+      👎 Feedback negativo:
+      <strong>${negativos}</strong>
+
+      <br><br>
+
+      ${
+        positivos + negativos > 0
+        ? "Actividad de feedback registrada correctamente."
+        : "Todavía no hay suficientes datos."
+      }
+
+    `;
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+/* ==================================================
+   LOGS
+================================================== */
+
+async function cargarLogs(){
+
+  const container =
+    document.getElementById("logsTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"logs",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const logs =
+      data.logs || [];
+
+    if(!logs.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No hay logs.
+        </div>`;
+
+      return;
+
+    }
+
+    let html = `
+
+      <div class="tableWrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Detalles</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+    logs.forEach(log=>{
+
+      html += `
+
+        <tr>
+
+          <td>${formatearFecha(log.fecha)}</td>
+
+          <td>${escapeHTML(log.usuario)}</td>
+
+          <td>${escapeHTML(log.accion)}</td>
+
+          <td>${escapeHTML(log.detalles)}</td>
+
+        </tr>
+
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  }catch(error){
+
+    container.textContent =
+      "Error al cargar logs.";
+
+  }
+
+}
+
+/* ==================================================
+   AUDITORIA
+================================================== */
+
+async function cargarAuditoria(){
+
+  const container =
+    document.getElementById("auditTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"auditoria",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const auditoria =
+      data.auditoria || [];
+
+    if(!auditoria.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No hay acciones administrativas registradas.
+        </div>`;
+
+      return;
+
+    }
+
+    let html = `
+
+      <div class="tableWrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Fecha</th>
+            <th>Administrador</th>
+            <th>Acción</th>
+            <th>Objetivo</th>
+            <th>Detalles</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+    auditoria.forEach(a=>{
+
+      html += `
+
+        <tr>
+
+          <td>${formatearFecha(a.fecha)}</td>
+
+          <td>${escapeHTML(a.usuario)}</td>
+
+          <td>${escapeHTML(a.accion)}</td>
+
+          <td>${escapeHTML(a.objetivo)}</td>
+
+          <td>${escapeHTML(a.detalles)}</td>
+
+        </tr>
+
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  }catch(error){
+
+    container.textContent =
+      "No se pudo cargar la auditoría.";
+
+  }
+
+}
+
+/* ==================================================
+   CONVERSACIONES
+================================================== */
+
+async function cargarConversaciones(){
+
+  const container =
+    document.getElementById("conversationTable");
+
+  try{
+
+    const data = await api({
+
+      accion:"conversaciones",
+      token:token
+
+    });
+
+    if(data.error){
+
+      container.textContent =
+        data.mensaje ||
+        data.error;
+
+      return;
+
+    }
+
+    const conversaciones =
+      data.conversaciones || [];
+
+    if(!conversaciones.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No hay conversaciones registradas.
+        </div>`;
+
+      return;
+
+    }
+
+    let html = `
+
+      <div class="tableWrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Pregunta</th>
+            <th>Respuesta</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+    conversaciones.forEach(c=>{
+
+      html += `
+
+        <tr>
+
+          <td>${formatearFecha(c.fecha)}</td>
+
+          <td>${escapeHTML(c.usuario)}</td>
+
+          <td>${escapeHTML(c.pregunta)}</td>
+
+          <td>${escapeHTML(c.respuesta)}</td>
+
+        </tr>
+
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  }catch(error){
+
+    container.textContent =
+      "No se pudieron cargar conversaciones.";
+
+  }
+
+}
+
+/* ==================================================
+   NOTIFICACIONES
+================================================== */
+
+function toggleNotifications(){
+
+  const panel =
+    document.getElementById(
+      "notificationPanel"
+    );
+
+  panel.classList.toggle("show");
+
+  if(panel.classList.contains("show"))
+    cargarNotificaciones();
+
+}
+
+async function cargarNotificaciones(){
+
+  if(
+    !token ||
+    tipo !== "admin"
+  )
+    return;
+
+  try{
+
+    const data = await api({
+
+      accion:"notificaciones",
+      token:token
+
+    });
+
+    if(data.error)
+      return;
+
+    const lista =
+      data.notificaciones || [];
+
+    const count =
+      document.getElementById(
+        "notificationCount"
+      );
+
+    if(data.pendientes > 0){
+
+      count.textContent =
+        data.pendientes;
+
+      count.classList.remove("hidden");
+
+    }else{
+
+      count.classList.add("hidden");
+
+    }
+
+    const container =
+      document.getElementById(
+        "notificationList"
+      );
+
+    if(!lista.length){
+
+      container.innerHTML =
+        `<div class="empty">
+          No tienes notificaciones.
+        </div>`;
+
+      return;
+
+    }
+
+    container.innerHTML =
+      lista.map(n=>`
+
+        <div
+          class="notificationItem ${
+            n.leida ? "" : "unread"
+          }"
+          onclick="marcarNotificacion(
+            '${escapeJS(n.id)}'
+          )"
+        >
+
+          <div class="notificationType">
+            ${escapeHTML(n.tipo)}
+          </div>
+
+          <div class="notificationText">
+            ${escapeHTML(n.mensaje)}
+          </div>
+
+          <div class="notificationDate">
+            ${formatearFecha(n.fecha)}
+            ·
+            ${escapeHTML(n.usuario)}
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+async function marcarNotificacion(id){
+
+  await api({
+
+    accion:"marcarNotificacion",
+    token:token,
+    id:id
+
+  });
+
+  cargarNotificaciones();
+
+}
+
+async function marcarTodasNotificaciones(){
+
+  await api({
+
+    accion:"marcarTodasNotificaciones",
+    token:token
+
+  });
+
+  cargarNotificaciones();
+
+}
+
+/* ==================================================
+   UTILIDADES
+================================================== */
+
+function escapeHTML(text){
+
+  return String(text ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+function escapeJS(text){
+
+  return String(text ?? "")
+    .replaceAll("\\","\\\\")
+    .replaceAll("'","\\'");
+
+}
+
+function formatearFecha(fecha){
+
+  if(!fecha)
+    return "—";
+
+  try{
+
+    return new Date(fecha)
+      .toLocaleString("es-MX");
+
+  }catch(e){
+
+    return String(fecha);
+
+  }
+
+}
+
+/* ==================================================
+   SESION
+================================================== */
+
+window.addEventListener("load",()=>{
+
+  if(token && usuario)
+    mostrarApp();
+
+});
+
+/* ==================================================
+   NOTIFICACIONES AUTO
+================================================== */
+
+setInterval(()=>{
+
+  if(
+    token &&
+    tipo === "admin"
+  ){
+
+    cargarNotificaciones();
+
+  }
+
+},15000);
+
+</script>
+
+</body>
+</html>
