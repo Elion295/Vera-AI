@@ -1,0 +1,55 @@
+name: Fix Vera Gemini 503
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-vera-ai-503.yml'
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch code.gs
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('code.gs')
+          text = p.read_text(encoding='utf-8')
+
+          old = '''    const response =\n      UrlFetchApp.fetch(\n        url,\n        {\n\n          method:\n            "post",\n\n          contentType:\n            "application/json",\n\n          payload:\n            JSON.stringify(\n              payload\n            ),\n\n          muteHttpExceptions:\n            true\n\n        }\n      );\n\n\n    const latencia =\n      Date.now() -\n      inicio;\n\n\n    const codigo =\n      response.getResponseCode();\n\n\n    const textoRespuesta =\n      response.getContentText();'''
+
+          new = '''    let response = null;\n    let codigo = 0;\n    let textoRespuesta = "";\n    let ultimoErrorIA = "";\n\n    // Gemini puede responder temporalmente con 500/502/503/504 o 429.\n    // Reintentamos unas veces antes de devolver el error al usuario.\n    const codigosReintentables = [429, 500, 502, 503, 504];\n    const maxIntentos = 3;\n\n    for (let intento = 1; intento <= maxIntentos; intento++) {\n      response = UrlFetchApp.fetch(\n        url,\n        {\n          method: "post",\n          contentType: "application/json",\n          payload: JSON.stringify(payload),\n          muteHttpExceptions: true\n        }\n      );\n\n      codigo = response.getResponseCode();\n      textoRespuesta = response.getContentText();\n\n      if (codigo >= 200 && codigo < 300) break;\n\n      ultimoErrorIA = textoRespuesta || ("HTTP " + codigo);\n\n      if (intento < maxIntentos && codigosReintentables.indexOf(codigo) !== -1) {\n        Utilities.sleep(intento * 1500);\n        continue;\n      }\n      break;\n    }\n\n    const latencia =\n      Date.now() -\n      inicio;'''
+
+          if old not in text:
+              raise SystemExit('Target Gemini fetch block not found; refusing to patch blindly.')
+
+          text = text.replace(old, new, 1)
+
+          old_err = '''      registrarLog(\n        sesion.usuario,\n        "ERROR_IA",\n        "Servicio de IA respondió " +\n        codigo\n      );\n\n\n      crearNotificacionAdmin(\n        "ERROR",\n        sesion.usuario,\n        "Vera recibió un error del servicio de IA."\n      );\n\n\n      return respuestaError(\n        "AI_SERVICE_ERROR",\n        "Vera no pudo responder en este momento.",\n        "El servicio de inteligencia artificial devolvió un error. Código interno: " +\n        codigo\n      );'''
+
+          new_err = '''      registrarLog(\n        sesion.usuario,\n        "ERROR_IA",\n        "Servicio de IA respondió " + codigo +\n        (ultimoErrorIA ? " | " + String(ultimoErrorIA).substring(0, 700) : "")\n      );\n\n      registrarConsumoVera(sesion.usuario, 0, 0, latencia, true);\n\n      crearNotificacionAdmin(\n        "ERROR",\n        sesion.usuario,\n        "Vera recibió un error del servicio de IA (HTTP " + codigo + ")."\n      );\n\n      let razonIA = "El servicio de inteligencia artificial devolvió un error HTTP " + codigo + ".";\n      try {\n        const detalle = JSON.parse(ultimoErrorIA || "{}");\n        if (detalle.error && detalle.error.message) {\n          razonIA += " Detalle: " + String(detalle.error.message).substring(0, 500);\n        }\n      } catch (e) {}\n\n      return respuestaError(\n        "AI_SERVICE_ERROR",\n        "Vera no pudo responder en este momento.",\n        razonIA + " Vera reintentó automáticamente la solicitud antes de rendirse."\n      );'''
+
+          if old_err not in text:
+              raise SystemExit('Target Gemini error block not found; refusing to patch blindly.')
+
+          text = text.replace(old_err, new_err, 1)
+
+          text = text.replace(' * - Búsqueda administrativa\n *\n * NO incluye:\n * - Tokens\n * - Costos\n * - Consumo de API', ' * - Búsqueda administrativa\n * - Tokens y cuotas\n * - Consumo de API y métricas de IA')
+
+          p.write_text(text, encoding='utf-8')
+
+      - name: Commit patched backend
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add code.gs
+          git diff --cached --quiet && exit 0
+          git commit -m "fix: make Vera Gemini calls resilient to transient 503 errors"
+          git push
