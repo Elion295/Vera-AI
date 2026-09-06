@@ -29,11 +29,8 @@
  * - Estado de Vera
  * - Auditoría administrativa
  * - Búsqueda administrativa
- *
- * NO incluye:
- * - Tokens
- * - Costos
- * - Consumo de API
+ * - Tokens y cuotas
+ * - Consumo de API y métricas de IA
  ****************************************************/
 
 
@@ -2221,40 +2218,44 @@ function procesarChat(body) {
       Date.now();
 
 
-    const response =
-      UrlFetchApp.fetch(
+    let response = null;
+    let codigo = 0;
+    let textoRespuesta = "";
+    let ultimoErrorIA = "";
+
+    // Gemini puede responder temporalmente con 500/502/503/504 o 429.
+    // Reintentamos unas veces antes de devolver el error al usuario.
+    const codigosReintentables = [429, 500, 502, 503, 504];
+    const maxIntentos = 3;
+
+    for (let intento = 1; intento <= maxIntentos; intento++) {
+      response = UrlFetchApp.fetch(
         url,
         {
-
-          method:
-            "post",
-
-          contentType:
-            "application/json",
-
-          payload:
-            JSON.stringify(
-              payload
-            ),
-
-          muteHttpExceptions:
-            true
-
+          method: "post",
+          contentType: "application/json",
+          payload: JSON.stringify(payload),
+          muteHttpExceptions: true
         }
       );
 
+      codigo = response.getResponseCode();
+      textoRespuesta = response.getContentText();
+
+      if (codigo >= 200 && codigo < 300) break;
+
+      ultimoErrorIA = textoRespuesta || ("HTTP " + codigo);
+
+      if (intento < maxIntentos && codigosReintentables.indexOf(codigo) !== -1) {
+        Utilities.sleep(intento * 1500);
+        continue;
+      }
+      break;
+    }
 
     const latencia =
       Date.now() -
       inicio;
-
-
-    const codigo =
-      response.getResponseCode();
-
-
-    const textoRespuesta =
-      response.getContentText();
 
 
     if (
@@ -2265,23 +2266,30 @@ function procesarChat(body) {
       registrarLog(
         sesion.usuario,
         "ERROR_IA",
-        "Servicio de IA respondió " +
-        codigo
+        "Servicio de IA respondió " + codigo +
+        (ultimoErrorIA ? " | " + String(ultimoErrorIA).substring(0, 700) : "")
       );
 
+      registrarConsumoVera(sesion.usuario, 0, 0, latencia, true);
 
       crearNotificacionAdmin(
         "ERROR",
         sesion.usuario,
-        "Vera recibió un error del servicio de IA."
+        "Vera recibió un error del servicio de IA (HTTP " + codigo + ")."
       );
 
+      let razonIA = "El servicio de inteligencia artificial devolvió un error HTTP " + codigo + ".";
+      try {
+        const detalle = JSON.parse(ultimoErrorIA || "{}");
+        if (detalle.error && detalle.error.message) {
+          razonIA += " Detalle: " + String(detalle.error.message).substring(0, 500);
+        }
+      } catch (e) {}
 
       return respuestaError(
         "AI_SERVICE_ERROR",
         "Vera no pudo responder en este momento.",
-        "El servicio de inteligencia artificial devolvió un error. Código interno: " +
-        codigo
+        razonIA + " Vera reintentó automáticamente la solicitud antes de rendirse."
       );
 
     }
