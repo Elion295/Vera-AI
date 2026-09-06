@@ -487,6 +487,19 @@ function doPost(e) {
         );
 
 
+      case "consumo":
+        return obtenerConsumoVeraAdmin(
+          body.token
+        );
+
+
+      case "guardarPalabrasProhibidas":
+        return guardarPalabrasProhibidasAdmin(
+          body.token,
+          body.palabras || []
+        );
+
+
       case "obtenerConfiguracion":
         return obtenerConfiguracionAdmin(
           body.token
@@ -715,6 +728,118 @@ function doPost(e) {
 
   }
 
+}
+
+
+/* ==================================================
+   VERA USAGE MODULE
+   Tokens, cuotas y métricas de consumo
+================================================== */
+
+const PROP_TOKEN_USO = "VERA_TOKEN_USO";
+const PROP_CONSUMO_IA = "VERA_CONSUMO_IA";
+const LIMITES_TOKENS_DIARIOS = {
+  invitado: 10000,
+  estandar: 50000,
+  premium: 500000,
+  moderador: Infinity,
+  admin: Infinity
+};
+
+function estimarTokensVera(texto) {
+  return Math.max(1, Math.ceil(String(texto || "").length / 4));
+}
+
+function claveDiaVera() {
+  const zona = Session.getScriptTimeZone() || "America/Mexico_City";
+  return Utilities.formatDate(new Date(), zona, "yyyy-MM-dd");
+}
+
+function obtenerUsoTokensVera(usuario) {
+  const props = PropertiesService.getScriptProperties();
+  const raw = props.getProperty(PROP_TOKEN_USO);
+  let data = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch (e) { data = {}; }
+  const key = claveDiaVera() + "|" + String(usuario || "");
+  return Number(data[key] || 0);
+}
+
+function sumarUsoTokensVera(usuario, cantidad) {
+  const props = PropertiesService.getScriptProperties();
+  const raw = props.getProperty(PROP_TOKEN_USO);
+  let data = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch (e) { data = {}; }
+  const key = claveDiaVera() + "|" + String(usuario || "");
+  data[key] = Number(data[key] || 0) + Math.max(0, Number(cantidad) || 0);
+  const keys = Object.keys(data);
+  if (keys.length > 5000) {
+    keys.slice(0, keys.length - 5000).forEach(k => delete data[k]);
+  }
+  props.setProperty(PROP_TOKEN_USO, JSON.stringify(data));
+  return data[key];
+}
+
+function limiteTokensVera(rol) {
+  return Object.prototype.hasOwnProperty.call(LIMITES_TOKENS_DIARIOS, rol)
+    ? LIMITES_TOKENS_DIARIOS[rol]
+    : LIMITES_TOKENS_DIARIOS.estandar;
+}
+
+function leerConsumoVera() {
+  const raw = PropertiesService.getScriptProperties().getProperty(PROP_CONSUMO_IA);
+  if (!raw) return { total: { peticiones: 0, inputTokens: 0, outputTokens: 0, tokens: 0, errores: 0, latenciaMs: 0 }, usuarios: {} };
+  try { return JSON.parse(raw); } catch (e) {
+    return { total: { peticiones: 0, inputTokens: 0, outputTokens: 0, tokens: 0, errores: 0, latenciaMs: 0 }, usuarios: {} };
+  }
+}
+
+function guardarConsumoVera(data) {
+  PropertiesService.getScriptProperties().setProperty(PROP_CONSUMO_IA, JSON.stringify(data));
+}
+
+function registrarConsumoVera(usuario, inputTokens, outputTokens, latenciaMs, error) {
+  const data = leerConsumoVera();
+  const total = data.total;
+  const nombre = String(usuario || "desconocido");
+  if (!data.usuarios[nombre]) data.usuarios[nombre] = { peticiones: 0, inputTokens: 0, outputTokens: 0, tokens: 0, errores: 0, latenciaMs: 0, ultimaActividad: null };
+  const u = data.usuarios[nombre];
+  const inT = Math.max(0, Number(inputTokens) || 0);
+  const outT = Math.max(0, Number(outputTokens) || 0);
+  const lat = Math.max(0, Number(latenciaMs) || 0);
+  u.peticiones += 1;
+  u.inputTokens += inT;
+  u.outputTokens += outT;
+  u.tokens += inT + outT;
+  u.errores += error ? 1 : 0;
+  u.latenciaMs += lat;
+  u.ultimaActividad = new Date().toISOString();
+  total.peticiones += 1;
+  total.inputTokens += inT;
+  total.outputTokens += outT;
+  total.tokens += inT + outT;
+  total.errores += error ? 1 : 0;
+  total.latenciaMs += lat;
+  guardarConsumoVera(data);
+}
+
+function obtenerConsumoVeraAdmin(token) {
+  if (!validarAdmin(token)) return respuestaError("FORBIDDEN", "No tienes permiso para ver el consumo.", "Se requiere una sesión administrativa.");
+  const data = leerConsumoVera();
+  Object.keys(data.usuarios).forEach(nombre => {
+    const u = data.usuarios[nombre];
+    u.latenciaPromedioMs = u.peticiones ? Math.round(u.latenciaMs / u.peticiones) : 0;
+  });
+  data.total.latenciaPromedioMs = data.total.peticiones ? Math.round(data.total.latenciaMs / data.total.peticiones) : 0;
+  return respuesta({ ok: true, consumo: data });
+}
+
+function guardarPalabrasProhibidasAdmin(token, palabras) {
+  if (!validarModerador(token)) return respuestaError("FORBIDDEN", "No tienes permiso.", "Se requiere una sesión de moderador o administrador.");
+  const seguridad = obtenerSeguridad();
+  seguridad.palabrasProhibidas = Array.isArray(palabras) ? palabras.map(x => String(x).trim()).filter(Boolean).slice(0, 500) : [];
+  PropertiesService.getScriptProperties().setProperty(PROP_SEGURIDAD, JSON.stringify(seguridad));
+  registrarAuditoria("Elion", "GUARDAR_PALABRAS", "seguridad", "Se actualizó la lista de palabras bloqueadas.");
+  return respuesta({ ok: true });
 }
 
 
@@ -1918,6 +2043,25 @@ function procesarChat(body) {
   );
 
 
+  const limiteTokensDia = limiteTokensVera(sesion.rol);
+  const tokensDiaUsados = obtenerUsoTokensVera(sesion.usuario);
+  const tokensEntradaEstimados = estimarTokensVera(mensaje);
+
+  if (
+    limiteTokensDia !== Infinity &&
+    tokensDiaUsados + tokensEntradaEstimados > limiteTokensDia
+  ) {
+    return respuesta({
+      error: "TOKEN_LIMIT",
+      mensaje: "Has alcanzado tu cuota diaria de tokens.",
+      razon: "Tu cuenta permite " + limiteTokensDia + " tokens estimados por día y ya utilizaste " + tokensDiaUsados + ".",
+      tokensUsados: tokensDiaUsados,
+      tokensLimite: limiteTokensDia,
+      tokensRestantes: Math.max(0, limiteTokensDia - tokensDiaUsados)
+    });
+  }
+
+
   /* ==================================================
      CONFIGURACIÓN IA
   ================================================== */
@@ -2187,12 +2331,19 @@ function procesarChat(body) {
     }
 
 
+    const tokensEntrada = estimarTokensVera(JSON.stringify(contents));
+    const tokensSalida = estimarTokensVera(respuestaIA);
+    const tokensTotales = tokensEntrada + tokensSalida;
+    const tokensDiaActual = sumarUsoTokensVera(sesion.usuario, tokensTotales);
+    registrarConsumoVera(sesion.usuario, tokensEntrada, tokensSalida, latencia, false);
+
     registrarLog(
       sesion.usuario,
       "CHAT",
       "Respuesta generada en " +
       latencia +
-      " ms."
+      " ms. Tokens estimados: " +
+      tokensTotales
     );
 
 

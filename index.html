@@ -1117,6 +1117,13 @@ td{
 
       <button
         class="adminTab"
+        onclick="mostrarSeccion('consumo',this)"
+      >
+        🧮 Consumo
+      </button>
+
+      <button
+        class="adminTab"
         onclick="mostrarSeccion('config',this)"
       >
         ⚙️ Vera
@@ -1556,6 +1563,26 @@ td{
         </p>
 
         <div id="healthGrid" class="healthGrid"></div>
+
+      </section>
+
+      <!-- CONSUMO -->
+
+      <section id="section-consumo" class="adminSection">
+
+        <h2 class="sectionTitle">Consumo de Vera</h2>
+
+        <p class="sectionDescription">Tokens estimados, peticiones, errores y latencia del servicio. Las cifras de tokens son aproximadas.</p>
+
+        <div id="consumptionGrid" class="statsGrid">Cargando...</div>
+
+        <div class="adminCard">
+          <div class="cardHeader">
+            <h3>Por usuario</h3>
+            <button class="smallBtn" onclick="cargarConsumo()">↻ Actualizar</button>
+          </div>
+          <div id="consumptionTable">Cargando...</div>
+        </div>
 
       </section>
 
@@ -2664,6 +2691,7 @@ function cargarSeccionAdmin(nombre){
   if(nombre==="moderacion") cargarModeracion();
   if(nombre==="seguridad") cargarSeguridad();
   if(nombre==="health") cargarHealth();
+  if(nombre==="consumo") cargarConsumo();
   if(nombre==="config") cargarConfiguracion();
   if(nombre==="mantenimiento") cargarMantenimiento();
   if(nombre==="analiticas") cargarAnaliticas();
@@ -2679,6 +2707,7 @@ function cargarTodoAdmin(){
   cargarUsuarios();
   cargarSolicitudes();
   cargarHealth();
+  cargarConsumo();
   cargarConfiguracion();
   cargarLogs();
   cargarConversaciones();
@@ -2740,6 +2769,11 @@ async function cargarDashboard(){
       <div class="statCard">
         <div class="statNumber">${s.invitados ?? 0}</div>
         <div class="statLabel">Invitados</div>
+      </div>
+
+      <div class="statCard">
+        <div class="statNumber">${s.mensajesHoy ?? 0}</div>
+        <div class="statLabel">Mensajes hoy</div>
       </div>
 
     `;
@@ -4705,6 +4739,32 @@ async function marcarTodasNotificaciones(){
 
   cargarNotificaciones();
 
+}
+
+/* ==================================================
+   CONSUMO
+================================================== */
+
+async function cargarConsumo(){
+  const grid=document.getElementById("consumptionGrid");
+  const table=document.getElementById("consumptionTable");
+  try{
+    const data=await api({accion:"consumo",token:token});
+    if(data.error){
+      grid.innerHTML=`<div class="empty">${escapeHTML(data.mensaje || data.error)}<br>${escapeHTML(data.razon || "")}</div>`;
+      return;
+    }
+    const c=data.consumo||{};
+    const t=c.total||{};
+    grid.innerHTML=`
+      <div class="statCard"><div class="statNumber">${t.peticiones||0}</div><div class="statLabel">Peticiones</div></div>
+      <div class="statCard"><div class="statNumber">${t.tokens||0}</div><div class="statLabel">Tokens estimados</div></div>
+      <div class="statCard"><div class="statNumber">${t.errores||0}</div><div class="statLabel">Errores IA</div></div>
+      <div class="statCard"><div class="statNumber">${t.latenciaPromedioMs||0} ms</div><div class="statLabel">Latencia promedio</div></div>`;
+    const rows=Object.entries(c.usuarios||{}).sort((a,b)=>(b[1].tokens||0)-(a[1].tokens||0));
+    if(!rows.length){table.innerHTML=`<div class="empty">No hay consumo registrado todavía.</div>`;return;}
+    table.innerHTML=`<div class="tableWrap"><table><thead><tr><th>Usuario</th><th>Peticiones</th><th>Entrada</th><th>Salida</th><th>Total</th><th>Latencia</th><th>Errores</th></tr></thead><tbody>`+rows.map(([n,u])=>`<tr><td>${escapeHTML(n)}</td><td>${u.peticiones||0}</td><td>${u.inputTokens||0}</td><td>${u.outputTokens||0}</td><td>${u.tokens||0}</td><td>${u.latenciaPromedioMs||0} ms</td><td>${u.errores||0}</td></tr>`).join("")+`</tbody></table></div>`;
+  }catch(e){console.error(e);grid.innerHTML=`<div class="empty">No se pudo cargar el consumo.</div>`;}
 }
 
 /* ==================================================
