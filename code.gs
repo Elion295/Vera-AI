@@ -1930,12 +1930,31 @@ function procesarChat(body) {
      HISTORIAL
   ================================================== */
 
-  const historial =
+  let historial =
     Array.isArray(
       body.historial
     )
       ? body.historial.slice(-30)
       : [];
+
+
+  /* Evita duplicar el mensaje actual si el cliente
+     ya lo incluyó dentro del historial. */
+  const ultimo =
+    historial.length
+      ? historial[historial.length - 1]
+      : null;
+
+
+  if (
+    ultimo &&
+    ultimo.rol === "user" &&
+    String(ultimo.texto || "").trim() === mensaje
+  ) {
+
+    historial = historial.slice(0, -1);
+
+  }
 
 
   const contents = [];
