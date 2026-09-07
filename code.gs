@@ -38,12 +38,12 @@
    CONFIGURACIÓN
 ================================================== */
 
-const GEMINI_API_KEY = "OCULTA";
+const GEMINI_API_KEY = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
 
 const DEFAULT_GEMINI_MODEL = "gemini-3.6-flash";
 
-const ADMIN_USERNAME = "Elion";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_USERNAME = PropertiesService.getScriptProperties().getProperty('ADMIN_USERNAME');
+const ADMIN_PASSWORD = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
 
 const SESSION_TIME = 21600;
 
